@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_water_bottle/wave_widget.dart';
 import 'package:widget_mask/widget_mask.dart';
 
 void main() {
@@ -32,18 +33,25 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final double appbarHeight = 60.0;
   final GlobalKey _widgetKey = GlobalKey();
-  int _counter = 0;
+  double _rate = 0.9;
 
   void _incrementCounter() {
     setState(() {
-      _counter++;
+      _rate = _rate - 0.1;
     });
   }
 
-  void _getWidgetInfo(_) {
+  void _decrementCounter() {
+    setState(() {
+      _rate = _rate + 0.1;
+    });
+  }
+
+  void _getWidgetInfo() {
     final RenderBox renderBox = _widgetKey.currentContext?.findRenderObject() as RenderBox;
     final Size size = renderBox.size;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
+    print("offset: $offset");
   }
 
   @override
@@ -66,49 +74,40 @@ class _MainPageState extends State<MainPage> {
           backgroundColor: Colors.white,
         ),
       ),
-      body: Center(
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              Text('Today: ', style: TextStyle(fontFamily: 'Jalnan')),
-              SizedBox(height: 30),
-              WidgetMask(
-                key: _widgetKey,
-                blendMode: BlendMode.srcATop,
-                childSaveLayer: true,
-                mask: CustomPaint(
-                  painter: OpenPainter(),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'images/bottle.png',
-                    fit: BoxFit.contain,
-                    height: 550,
-                  ),
+      body: Container(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            WidgetMask(
+              blendMode: BlendMode.srcATop,
+              mask: WaveWidget(rate: _rate),
+              childSaveLayer: true,
+              child: Center(
+                child: Image.asset(
+                  'images/bottle.png',
+                  fit: BoxFit.contain,
+                  height: 550,
                 ),
               ),
-            ],
-          ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                FloatingActionButton(
+                  onPressed: _decrementCounter,
+                  child: Icon(Icons.remove),
+                ),
+                FloatingActionButton(
+                  onPressed: _incrementCounter,
+                  child: Icon(Icons.add),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        child: Icon(Icons.settings),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-}
-
-class OpenPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint1 = Paint()
-      ..color = Color(0xff995588)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(Offset(100, 100) & const Size(200, 150), paint1);
-  }
- 
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
